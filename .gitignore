@@ -1,4 +1,4 @@
 *.csv
-data/datasets/images/fer2013/
+#data/datasets/images/fer2013/
 fer2013/
 results/
