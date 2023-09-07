@@ -1,20 +1,4 @@
-# ignore directories
-.ipynb_checkpoints/
-__pycache__/
+*.csv
+data/datasets/images/fer2013/
+fer2013/
 results/
-
-
-# OS generated files
-.DS_Store
-
-
-# file type
-*.txt
-*.pth
-*.pdf
-*.ipynb
-
-
-# IntelliJ IDEA
-.idea/
-*.iml

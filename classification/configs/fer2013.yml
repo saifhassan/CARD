@@ -1,16 +1,16 @@
 data:
-    dataset: "CIFAR10"
+    dataset: "FER2013"
     seed: 2000
     label_min_max: [0.001, 0.999]
-    num_classes: 10
+    num_classes: 7
     num_workers: 4
-    dataroot: '/data/datasets/images/cifar10'
+    dataroot: 'data/datasets/images/fer2013'
 
 model:
     type: "simple"
-    data_dim: 3072
-#    data_dim: [3, 32, 32]
-    n_input_channels: 3
+    data_dim: 2304 #3072
+#    data_dim: [1, 48, 48]
+    n_input_channels: 1
     n_input_padding: 0
     feature_dim: 4096
     hidden_dim: 4096
@@ -31,19 +31,19 @@ diffusion:
     num_figs: 10
     include_guidance: True  # concat y_t with aux pred as eps_theta input
     apply_aux_cls: True
-    trained_aux_cls_ckpt_path: "/data/classification/pretrained/cifar10_ckpt"
-    trained_aux_cls_ckpt_name: "snapshot_supervised.ckpt"  # test accuracy 90.39%, applied in the paper
+#    trained_aux_cls_ckpt_path: "/data/classification/pretrained/cifar10_ckpt"
+#    trained_aux_cls_ckpt_name: "snapshot_supervised.ckpt"  # test accuracy 90.39%, applied in the paper
 #    trained_aux_cls_ckpt_name: "snapshot_self_supervised.ckpt"  # test accuracy 94.31%
     aux_cls:
         arch: resnet18_ckpt  # lenet5
-        pre_train: False
+        pre_train: True
         joint_train: False
         n_pretrain_epochs: 10
         logging_interval: 1
     
 training:
     batch_size: 256
-    n_epochs: 1000
+    n_epochs: 2000
     warmup_epochs: 40
     add_t0_loss: False
     n_steps_req_grad: 100
@@ -63,7 +63,7 @@ sampling:
     image_folder: 'sampling_image_samples'
 
 testing:
-    batch_size: 250
+    batch_size: 64
     sampling_size: 1000
     last_only: True
     plot_freq: 200

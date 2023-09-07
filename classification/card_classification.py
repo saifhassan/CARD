@@ -20,7 +20,6 @@ from diffusion_utils import *
 
 plt.style.use('ggplot')
 
-
 class Diffusion(object):
     def __init__(self, args, config, device=None):
         self.args = args
@@ -92,7 +91,7 @@ class Diffusion(object):
                     nn.ReLU(),
                     nn.Linear(100, config.data.num_classes)
                 ).to(self.device)
-            elif config.data.dataset in ["FashionMNIST", "CIFAR10", "CIFAR100"]:
+            elif config.data.dataset in ["FashionMNIST", "CIFAR10", "CIFAR100", "FER2013"]: # name of dataset to include by saif
                 if config.diffusion.aux_cls.arch == "lenet":
                     self.cond_pred_model = LeNet(config.data.num_classes,
                                                  config.model.n_input_channels,

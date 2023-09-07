@@ -1,5 +1,7 @@
 import math
+import time
 import torch
+import numpy as np
 
 
 def make_beta_schedule(schedule="linear", num_timesteps=1000, start=1e-5, end=1e-2):
@@ -33,6 +35,7 @@ def extract(input, t, x):
     out = torch.gather(input, 0, t.to(input.device))
     reshape = [t.shape[0]] + [1] * (len(shape) - 1)
     return out.reshape(*reshape)
+
 
 # Forward functions
 def q_sample(y, y_0_hat, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, t, noise=None):
@@ -74,7 +77,7 @@ def p_sample(model, x, y, y_0_hat, y_T_mean, t, alphas, one_minus_alphas_bar_sqr
     gamma_1 = (sqrt_one_minus_alpha_bar_t_m_1.square()) * (alpha_t.sqrt()) / (sqrt_one_minus_alpha_bar_t.square())
     gamma_2 = 1 + (sqrt_alpha_bar_t - 1) * (alpha_t.sqrt() + sqrt_alpha_bar_t_m_1) / (
         sqrt_one_minus_alpha_bar_t.square())
-    eps_theta = model(x, y, t, y_0_hat).to(device).detach()
+    eps_theta = model(x, y, t, yhat=y_0_hat, mode='theta').to(device).detach()
     # y_0 reparameterization
     y_0_reparam = 1 / sqrt_alpha_bar_t * (
             y - (1 - sqrt_alpha_bar_t) * y_T_mean - eps_theta * sqrt_one_minus_alpha_bar_t)
@@ -92,12 +95,11 @@ def p_sample_t_1to0(model, x, y, y_0_hat, y_T_mean, one_minus_alphas_bar_sqrt):
     t = torch.tensor([0]).to(device)  # corresponding to timestep 1 (i.e., t=1 in diffusion models)
     sqrt_one_minus_alpha_bar_t = extract(one_minus_alphas_bar_sqrt, t, y)
     sqrt_alpha_bar_t = (1 - sqrt_one_minus_alpha_bar_t.square()).sqrt()
-    eps_theta = model(x, y, t, y_0_hat).to(device).detach()
+    eps_theta = model(x, y, t, y_0_hat, mode='theta').to(device).detach()
     # y_0 reparameterization
     y_0_reparam = 1 / sqrt_alpha_bar_t * (
-            y - (1 - sqrt_alpha_bar_t) * y_T_mean - eps_theta * sqrt_one_minus_alpha_bar_t)
-    y_t_m_1 = y_0_reparam.to(device)
-    return y_t_m_1
+            y - (1 - sqrt_alpha_bar_t) * y_T_mean - eps_theta * sqrt_one_minus_alpha_bar_t).to(device)
+    return y_0_reparam
 
 
 def y_0_reparam(model, x, y, y_0_hat, y_T_mean, t, one_minus_alphas_bar_sqrt):
@@ -108,7 +110,7 @@ def y_0_reparam(model, x, y, y_0_hat, y_T_mean, t, one_minus_alphas_bar_sqrt):
     device = next(model.parameters()).device
     sqrt_one_minus_alpha_bar_t = extract(one_minus_alphas_bar_sqrt, t, y)
     sqrt_alpha_bar_t = (1 - sqrt_one_minus_alpha_bar_t.square()).sqrt()
-    eps_theta = model(x, y, t, y_0_hat).to(device).detach()
+    eps_theta = model(x, y, t, y_0_hat, mode='theta').to(device).detach()
     # y_0 reparameterization
     y_0_reparam = 1 / sqrt_alpha_bar_t * (
             y - (1 - sqrt_alpha_bar_t) * y_T_mean - eps_theta * sqrt_one_minus_alpha_bar_t).to(device)

@@ -293,7 +293,7 @@ def main():
             runner.sample()
             procedure = "Sampling"
         elif args.test:
-            if config.data.dataset in ['FashionMNIST', 'MNIST', 'CIFAR10', 'CIFAR100', 'IMAGENE100']:
+            if config.data.dataset in ['FashionMNIST', 'MNIST', 'CIFAR10', 'CIFAR100', 'IMAGENE100', 'FER2013']:
                 y_majority_vote_accuracy_all_steps_list = runner.test_image_task()
             else:
                 y_majority_vote_accuracy_all_steps_list = runner.test()

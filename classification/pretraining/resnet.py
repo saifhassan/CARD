@@ -89,7 +89,8 @@ class ResNet(nn.Module):
         self.dilation = 1
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(3, self.in_planes, kernel_size=3,
+        # 1 in case of grayscale images, 3 for rgb images by saif
+        self.conv1 = nn.Conv2d(1, self.in_planes, kernel_size=3,
                                stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(self.in_planes)
         self.layer1 = self._make_layer(block, 64, layers[0], stride=1)

@@ -8,6 +8,49 @@ import torchvision
 from torch import nn
 from torchvision import transforms
 
+from torch.utils.data import Dataset
+import os
+from PIL import Image
+import pandas as pd
+
+# start code by saif
+class CustomFER2013Dataset(Dataset):
+    def __init__(self, root_dir, train=True, transform=None):
+        self.root_dir = root_dir
+        self.train = train
+        self.transform = transform
+        self.data = pd.read_csv(os.path.join(root_dir, 'fer2013.csv'))
+        self.emotions = {
+            0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy',
+            4: 'Sad', 5: 'Surprise', 6: 'Neutral'
+        }
+        
+        # Split the dataset into training and testing sets
+        if self.train:
+            self.data = self.data[self.data['Usage'] == 'Training']
+        else:
+            self.data = self.data[self.data['Usage'] == 'PublicTest']  # You can adjust this for your needs
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        row = self.data.iloc[idx]
+        image = [int(pixel) for pixel in row['pixels'].split()]
+        image = np.array(image, dtype=np.uint8).reshape(48, 48)  # Convert to NumPy array and reshape
+        image = Image.fromarray(image, 'L')  # Convert NumPy array to PIL Image (grayscale)
+
+        emotion = self.emotions[row['emotion']]
+        
+        if self.transform:
+            image = self.transform(image)
+        
+        # Convert emotion label to numerical value
+        emotion_label = torch.tensor(int(row['emotion']), dtype=torch.long)
+
+        return image, emotion_label
+
+# end code by saif
 
 def set_random_seed(seed):
     print(f"\n* Set seed {seed}")
@@ -146,6 +189,28 @@ def get_dataset(args, config):
                                                       download=True, transform=transform)
         test_dataset = torchvision.datasets.CIFAR100(root=config.data.dataroot, train=False,
                                                      download=True, transform=transform)
+
+    # start code by saif
+
+    elif config.data.dataset == "FER2013":
+
+        # Define data normalization statistics for FER2013 (replace with actual values)
+        data_norm_mean = 0.5
+        data_norm_std = 0.5
+
+        # Define data transformation for FER2013
+        transform = transforms.Compose([
+            transforms.Resize((48, 48)),  # Resize to match CIFAR100 size
+            transforms.ToTensor(),  # Convert to tensor
+            transforms.Normalize(mean=data_norm_mean, std=data_norm_std)  # Normalize with the calculated mean and std
+        ])
+
+        # Set the path to your FER2013 dataset directory
+        train_dataset = CustomFER2013Dataset(root_dir=config.data.dataroot, train=True, transform=transform)
+        test_dataset = CustomFER2013Dataset(root_dir=config.data.dataroot, train=False, transform=transform)
+
+    # end code by saif
+
     elif config.data.dataset == "gaussian_mixture":
         data_object = GaussianMixture(n_samples=config.data.dataset_size,
                                       seed=args.seed,

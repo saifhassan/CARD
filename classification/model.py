@@ -32,7 +32,7 @@ class ConditionalModel(nn.Module):
         # encoder for x
         if config.data.dataset == 'toy':
             self.encoder_x = nn.Linear(data_dim, feature_dim)
-        elif config.data.dataset in ['FashionMNIST', 'MNIST', 'CIFAR10', 'CIFAR100', 'IMAGENE100']:
+        elif config.data.dataset in ['FashionMNIST', 'MNIST', 'CIFAR10', 'CIFAR100', 'IMAGENE100', 'FER2013']: # dataset name include by saif
             if arch == 'linear':
                 self.encoder_x = nn.Sequential(
                     nn.Linear(data_dim, hidden_dim),
